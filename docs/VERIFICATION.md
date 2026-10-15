@@ -12,7 +12,7 @@ Date: October 15, 2026.
 - A GUI change assigning Cross to Middle Click appeared in the CLI. Restoring Cross to Disabled through the CLI appeared in the GUI. The temporary mapping was restored.
 - CLI status, enable, mapping updates, and configuration export were exercised against the installed app.
 - The settings window was inspected through accessibility state and a rendered screenshot.
-- **28 automated tests passed**: 23 core/command/pipeline tests and five persistence/IPC tests.
+- **29 automated tests passed**: 24 core/command/pipeline tests and five persistence/IPC tests.
 - Strict Swift format lint, the release build, app bundle assembly, local ad hoc signature validation, plist validation, and shell syntax checks passed through `scripts/check.sh`.
 
 ## Review and regression checks
@@ -31,7 +31,6 @@ The initial test attempts exposed local compiler-cache restrictions and Command 
 
 - Live disconnect/reconnect while dragging, sleep/wake, and permission revocation during output.
 - Multi-monitor behavior, a second simultaneously connected controller, DS4 revision 1, Intel Macs, or older macOS versions.
-- Remote GitHub Actions execution (tracked separately from local checks).
 - Developer ID signing, Apple notarization, a clean-machine downloaded installation, or App Store review. Only an ad hoc local signature was applied.
 
 These checks remain requirements before broad public compatibility or release claims. Basic Bluetooth mouse functionality is verified on the user's controller; the unperformed scenarios above are not represented as passed.
@@ -42,8 +41,10 @@ These checks remain requirements before broad public compatibility or release cl
 - CLI on this Mac's PATH: `/opt/homebrew/bin/ds4mouse`
 - Additional user-local CLI symlink: `~/.local/bin/ds4mouse`
 
-The app was left enabled with default mappings. Remove both CLI symlinks when uninstalling this installation. The generic installation script creates only the user-local symlink.
+Version 0.2.0 was installed with pointer acceleration set to 1.0; the saved pointer speed remains 2.0. The public bundle identity requires Accessibility permission to be granted again. It is left disabled pending that permission. The installed app accepted and exported the acceleration setting through its CLI. Remove both CLI symlinks when uninstalling this installation. The generic installation script creates only the user-local symlink.
 
 ## Version 0.2.0 additions
 
-Velocity-based pointer acceleration, GUI and CLI adjustment, backward-compatible configuration loading, and the GPT-generated app icon passed local checks. Four acceleration tests cover fast versus slow movement, acceleration disabled, older saved configurations, and invalid CLI values. The new acceleration feel has not yet been physically evaluated by the user.
+Velocity-based pointer acceleration, GUI and CLI adjustment, backward-compatible configuration loading, and the GPT-generated app icon passed local checks. Five acceleration tests cover fast versus slow movement, acceleration disabled, older saved configurations, invalid CLI values, and equivalent movement delivered individually or in Bluetooth history batches. The new acceleration feel has not yet been physically evaluated by the user.
+
+GitHub Actions passed its first clean macOS build, formatting checks, and all then-current 28 tests: https://github.com/vivs999/DS4Mouse/actions/runs/38809368851. The subsequent batching fix passed all 29 tests locally.

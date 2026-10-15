@@ -7,6 +7,7 @@ public struct InputPipeline: Sendable {
   private var mapper: MouseMapper
   private var primed = false
   private var contactIDs: [Int] = []
+  private var touchReportTime: Double?
   public init(configuration: Configuration) { mapper = MouseMapper(configuration: configuration) }
   public mutating func releaseAll() -> [MouseIntent] { mapper.releaseAll() }
 
@@ -18,19 +19,27 @@ public struct InputPipeline: Sendable {
       output += mapper.handle(event, at: now)
     }
     if mapper.dragging { gestures.suppressTap() }
-    for sample in report.samples where samples.accept(sample.counter) {
+    let freshSamples = report.samples.filter { samples.accept($0.counter) }
+    // Bluetooth reports may contain several fresh samples. Distribute their timing
+    // across the report interval so batching does not change pointer acceleration.
+    let interval = touchReportTime.map { max(0, now - $0) } ?? (1.0 / 60)
+    for (index, sample) in freshSamples.enumerated() {
+      let sampleTime =
+        now - interval * Double(freshSamples.count - index - 1)
+        / Double(freshSamples.count)
       let nextIDs = sample.contacts.map(\.id).sorted()
       if nextIDs != contactIDs {
         mapper.resetMotion()
         contactIDs = nextIDs
       }
-      let events = gestures.consume(sample.contacts, at: now, dragging: mapper.dragging)
+      let events = gestures.consume(sample.contacts, at: sampleTime, dragging: mapper.dragging)
       if !primed {
         gestures.suppressTap()
       } else {
-        for event in events { output += mapper.handle(event, at: now) }
+        for event in events { output += mapper.handle(event, at: sampleTime) }
       }
     }
+    if !freshSamples.isEmpty { touchReportTime = now }
     primed = true
     return output
   }

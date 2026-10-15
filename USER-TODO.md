@@ -4,7 +4,8 @@ Updated October 15, 2026. Local functionality is verified on the user's Bluetoot
 
 ## Needed for local use after the app is built
 
-- [x] Grant DS4Mouse permission to generate mouse events. The installed app reports permission granted and active mouse output.
+- [x] Grant the original development build permission and verify active mouse output.
+- [ ] Re-grant Accessibility to version 0.2.0 after the public bundle identifier change; quit and reopen the app.
 - [x] Check pointer movement, one-finger tap, two-finger tap, two-finger scrolling, and physical-button dragging. The user confirmed all five work over Bluetooth.
 - [ ] Before a public release, check disconnect/reconnect during dragging, sleep/wake, and the other unverified scenarios in [VERIFICATION.md](docs/VERIFICATION.md).
 
@@ -32,14 +33,14 @@ Apple issues Developer ID certificates to members of its developer programs. A D
 
 These are implementation/release tasks for the agent once the required approvals and credentials are available.
 
-- [x] Pass local lint/format checks, compiler checks, 28 tests, app build, local signature validation, plist validation, and shell syntax checks.
-- [ ] Run the clean-checkout build and configured macOS CI after the repository is created.
+- [x] Pass local lint/format checks, compiler checks, 29 tests, app build, local signature validation, plist validation, and shell syntax checks.
+- [x] Run the clean-checkout build and configured macOS CI after the repository is created (first published build passed).
 - [ ] Record hardware tests and accurately label tested macOS versions and controller revisions.
 - [x] Check third-party provenance, licensing, ignored files, and absence of secrets/private data.
 - [ ] Sign all shipped executables with Developer ID Application, Hardened Runtime, and secure timestamps; exclude debug entitlements.
 - [ ] Submit with `notarytool`, inspect the result/log, and require acceptance.
 - [ ] Staple and validate the ticket, then package the signed app and generate a checksum.
 - [ ] Validate signatures and Gatekeeper assessment; test installation and launch of a downloaded artifact, including its permission setup.
-- [ ] Publish only after an explicit user request, and distinguish completed checks from remaining manual verification.
+- [x] Publish MIT source on explicit request; retain the binary-release checks above as incomplete.
 
 Apple notarization checks software for malicious content and signing issues. It is not App Store review and does not certify gesture correctness. [Apple notarization requirements](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
