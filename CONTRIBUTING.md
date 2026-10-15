@@ -4,4 +4,4 @@ Use Swift 6 with the macOS SDK. Keep platform-independent behavior in DS4Core an
 
 Run `./scripts/check.sh` before proposing a change. Keep credentials and generated builds out of the repository. Document manual hardware checks separately from automated tests. Changes to protocol layout, contact handling, or output cleanup need a focused regression case and controller verification.
 
-The repository license must be selected before public contributions are solicited.
+Source is licensed under MIT; contributions are made under the same license.

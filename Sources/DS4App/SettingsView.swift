@@ -75,24 +75,31 @@ struct SettingsView: View {
               Text("Traditional").tag("traditional")
             }
           }
-          Section("Permissions") {
-            Text(
-              service.state.permissionGranted
-                ? "Mouse event permission is granted."
-                : "Allow DS4Mouse in Privacy & Security → Accessibility to control the pointer.")
-            Button("Open Accessibility settings") {
-              service.mouse.requestPermission()
-              if let url = URL(
-                string:
-                  "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
-              {
-                NSWorkspace.shared.open(url)
+          if service.needsPermissionSettings {
+            Section("Permissions") {
+              if !service.state.permissionGranted {
+                Text(
+                  "Allow DS4Mouse in Privacy & Security → \(service.mouse.permissionSettingsName) to control the pointer."
+                )
+                Button("Open \(service.mouse.permissionSettingsName)") {
+                  service.mouse.requestPermission()
+                  if let url = URL(
+                    string:
+                      "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                  ) {
+                    NSWorkspace.shared.open(url)
+                  }
+                }
               }
+              if service.needsInputMonitoringPermission {
+                Text("Allow DS4Mouse in Input Monitoring to read controller input.")
+                Button("Open Input Monitoring settings") {
+                  service.openInputMonitoringSettings()
+                }
+              }
+              Text("After changing permissions, quit and reopen DS4Mouse if needed.")
+                .font(.caption).foregroundStyle(.secondary)
             }
-            Text(
-              "If controller input is blocked, also check Privacy & Security → Input Monitoring."
-            )
-            .font(.caption).foregroundStyle(.secondary)
           }
         }.formStyle(.grouped).tabItem { Text("General") }
         Form {

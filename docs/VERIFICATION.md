@@ -48,3 +48,19 @@ Version 0.2.0 was installed with pointer acceleration set to 1.0; the saved poin
 Velocity-based pointer acceleration, GUI and CLI adjustment, backward-compatible configuration loading, and the GPT-generated app icon passed local checks. Five acceleration tests cover fast versus slow movement, acceleration disabled, older saved configurations, invalid CLI values, and equivalent movement delivered individually or in Bluetooth history batches. The new acceleration feel has not yet been physically evaluated by the user.
 
 GitHub Actions passed its first clean macOS build, formatting checks, and all then-current 28 tests: https://github.com/vivs999/DS4Mouse/actions/runs/38809368851. The subsequent batching fix passed all 29 tests locally.
+
+## Mouse-control permission repair
+
+The installed controller received thousands of valid Bluetooth reports while mouse-output permission was false. System Settings displayed DS4Mouse as enabled, but the installed ad hoc signature had a designated requirement tied to its current code hash. Replacing builds had invalidated the older permission identity.
+
+Local builds now use an available Apple Development identity. All 29 tests and the full build checks passed after the repair. A separate signing regression check modified a copied bundle's resources, re-signed it, and confirmed its designated requirement stayed identical and its signature validated. The stable-signed app was installed. The macOS 27 permission label now reads Device Control and Data Access; the earlier label is retained for earlier OS versions. Input Monitoring is no longer offered automatically if valid controller reports are already being received.
+
+The stale system entry was removed with user authorization. After fresh authorization and restart, the running app reported Accessibility trust true, mouse-event permission true, HID post access granted, a connected controller, 702 validated reports, and ready true. The user subsequently confirmed that controller input works again. [Apple's signing requirement explanation](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements) describes why ad hoc updates do not retain privacy identity.
+
+The `doctor --json` response now includes read-only permission diagnostics and the running app path/identifier. Enabling mouse control requests missing native mouse-event permission once per launch, after the IPC response is completed, so a system prompt does not block the CLI response. The final full check passed all 29 tests and the certificate-signed build.
+
+## Permission UI cleanup
+
+The permission section is hidden once mouse output is authorized and controller input is proven by valid reports (or Input Monitoring is granted). Resolved permission shortcuts disappear independently; the whole section disappears when setup is complete. The app-owned input-permission alert polls in modal run-loop mode and dismisses itself when its requirement is satisfied.
+
+All 29 tests and the full check passed. The update retained the same certificate-backed designated requirement. After installation and restart, the existing permission remained granted and the app reported enabled, ready, active controller mouse output, and valid Bluetooth reports. No permission re-grant was needed for this update.

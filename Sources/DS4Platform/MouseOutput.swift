@@ -1,6 +1,8 @@
 import AppKit
+import ApplicationServices
 import CoreGraphics
 import DS4Core
+import IOKit.hidsystem
 
 @MainActor public final class MouseOutput {
   private let source = CGEventSource(stateID: .hidSystemState)
@@ -9,6 +11,20 @@ import DS4Core
   private var scrollRemainder = CGPoint.zero
   private var lastClick: (MouseButton, Double, CGPoint, Int)?
   public init() { source?.localEventsSuppressionInterval = 0 }
+  public var permissionSettingsName: String {
+    ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27
+      ? "Device Control and Data Access" : "Accessibility"
+  }
+  public var permissionDiagnostics: [String: String] {
+    [
+      "postEventAccess": String(CGPreflightPostEventAccess()),
+      "accessibilityTrusted": String(AXIsProcessTrusted()),
+      "hidPostAccess": String(IOHIDCheckAccess(kIOHIDRequestTypePostEvent).rawValue),
+      "hidListenAccess": String(IOHIDCheckAccess(kIOHIDRequestTypeListenEvent).rawValue),
+      "bundlePath": Bundle.main.bundleURL.path,
+      "bundleIdentifier": Bundle.main.bundleIdentifier ?? "unknown",
+    ]
+  }
   public var permitted: Bool { CGPreflightPostEventAccess() }
   public func requestPermission() { _ = CGRequestPostEventAccess() }
 

@@ -5,7 +5,7 @@ Updated October 15, 2026. Local functionality is verified on the user's Bluetoot
 ## Needed for local use after the app is built
 
 - [x] Grant the original development build permission and verify active mouse output.
-- [ ] Re-grant Accessibility to version 0.2.0 after the public bundle identifier change; quit and reopen the app.
+- [x] Re-authorize the stable-signed app in Device Control and Data Access, restart, and confirm live API permission and ready state.
 - [x] Check pointer movement, one-finger tap, two-finger tap, two-finger scrolling, and physical-button dragging. The user confirmed all five work over Bluetooth.
 - [ ] Before a public release, check disconnect/reconnect during dragging, sleep/wake, and the other unverified scenarios in [VERIFICATION.md](docs/VERIFICATION.md).
 

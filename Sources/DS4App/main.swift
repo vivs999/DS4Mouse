@@ -24,7 +24,21 @@ import SwiftUI
       NSApp.terminate(nil)
       return
     }
-    item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    item = NSStatusBar.system.statusItem(withLength: 26)
+    if let button = item.button {
+      let image =
+        Bundle.main.url(forResource: "MenuBarIcon", withExtension: "png")
+        .flatMap { NSImage(contentsOf: $0) }
+        ?? NSImage(named: NSImage.applicationIconName)
+      if let image {
+        image.size = NSSize(width: 22, height: 22)
+        image.isTemplate = true
+      }
+      button.image = image
+      button.imagePosition = .imageOnly
+      button.imageScaling = .scaleProportionallyDown
+      button.title = ""
+    }
     subscription = service.$state.sink { [weak self] _ in self?.updateMenu() }
     updateMenu()
     for number in [SIGTERM, SIGINT] {
@@ -43,7 +57,6 @@ import SwiftUI
   }
   private func updateMenu() {
     guard item != nil else { return }
-    item.button?.title = service.state.enabled ? "DS4 ●" : "DS4"
     item.button?.toolTip = "DS4Mouse: \(service.state.message)"
     item.button?.setAccessibilityLabel("DS4Mouse")
     let menu = NSMenu()

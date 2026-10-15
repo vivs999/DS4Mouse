@@ -49,15 +49,18 @@ public struct ControlResponse: Codable, Sendable {
   public var exitCode: Int32
   public var message: String
   public var status: ServiceStatus?
+  public var diagnostics: [String: String]?
   public var configuration: Configuration?
   public init(
     ok: Bool = true, exitCode: Int32 = 0, message: String,
-    status: ServiceStatus? = nil, configuration: Configuration? = nil
+    status: ServiceStatus? = nil, configuration: Configuration? = nil,
+    diagnostics: [String: String]? = nil
   ) {
     self.ok = ok
     self.exitCode = exitCode
     self.message = message
     self.status = status
+    self.diagnostics = diagnostics
     self.configuration = configuration
   }
 }

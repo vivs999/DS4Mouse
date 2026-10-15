@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import DS4Core
+import IOKit.hidsystem
 
 @MainActor public final class AppService: ObservableObject {
   @Published public private(set) var configuration = Configuration.defaults
@@ -25,6 +26,9 @@ import DS4Core
   private var configError: String?
   private var wasReady = false
   private var running = false
+  private var offeredInputPermission = false
+  private var requestedOutputPermission = false
+  private var inputPermissionAlert: NSAlert?
 
   public init() {
     do { configuration = try store.load() } catch {
@@ -144,7 +148,7 @@ import DS4Core
     } else if sleeping {
       message = "Enabled — waiting for wake"
     } else if !mouse.permitted {
-      message = "Enabled — Accessibility permission needed"
+      message = "Enabled — \(mouse.permissionSettingsName) permission needed"
     } else if selected == nil {
       message = "Enabled — waiting for controller"
     } else if let inputError {
@@ -166,9 +170,57 @@ import DS4Core
     pipeline = InputPipeline(configuration: candidate)
     refresh()
   }
+  public var inputMonitoringGranted: Bool {
+    IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
+  }
+  public var needsInputMonitoringPermission: Bool {
+    validReports == 0 && !inputMonitoringGranted
+  }
+  public var needsPermissionSettings: Bool {
+    !state.permissionGranted || needsInputMonitoringPermission
+  }
+  public func openInputMonitoringSettings() {
+    _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+    if let url = URL(
+      string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")
+    {
+      NSWorkspace.shared.open(url)
+    }
+  }
+  private func offerInputMonitoring() {
+    guard !offeredInputPermission, needsInputMonitoringPermission else { return }
+    offeredInputPermission = true
+    let alert = NSAlert()
+    alert.messageText = "Allow controller input"
+    alert.informativeText =
+      "Enable DS4Mouse in Privacy & Security → Input Monitoring so it can read your controller. "
+      + "After changing permission, quit and reopen DS4Mouse."
+    alert.addButton(withTitle: "Open Input Monitoring")
+    alert.addButton(withTitle: "Not now")
+    inputPermissionAlert = alert
+    let permissionTimer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+      Task { @MainActor in
+        guard let self, let current = self.inputPermissionAlert,
+          NSApp.modalWindow === current.window, !self.needsInputMonitoringPermission
+        else { return }
+        NSApp.stopModal(withCode: .abort)
+        current.window.orderOut(nil)
+      }
+    }
+    RunLoop.main.add(permissionTimer, forMode: .modalPanel)
+    defer {
+      permissionTimer.invalidate()
+      inputPermissionAlert = nil
+    }
+    NSApp.activate(ignoringOtherApps: true)
+    if alert.runModal() == .alertFirstButtonReturn { openInputMonitoringSettings() }
+  }
   public func perform(_ request: ControlRequest) {
     let response = handle(request)
     uiError = response.exitCode == 2 || response.exitCode == 3 ? response.message : nil
+    if response.ok, state.enabled, ["on", "toggle"].contains(request.command) {
+      offerInputMonitoring()
+    }
   }
   public func handle(_ request: ControlRequest) -> ControlResponse {
     guard running else {
@@ -225,11 +277,19 @@ import DS4Core
       default: throw AppError("Unknown command: \(request.command).")
       }
       refresh()
+      if ["on", "toggle"].contains(request.command), enabled,
+        !mouse.permitted, !requestedOutputPermission
+      {
+        requestedOutputPermission = true
+        // Let IPC finish before the system presents its native permission dialog.
+        Task { @MainActor [weak self] in self?.mouse.requestPermission() }
+      }
       let waiting = ["on", "toggle"].contains(request.command) && enabled && !ready
       return ControlResponse(
         exitCode: waiting ? 4 : 0, message: state.message, status: state,
         configuration: request.command == "mappings" || request.command == "doctor"
-          ? configuration : nil)
+          ? configuration : nil,
+        diagnostics: request.command == "doctor" ? mouse.permissionDiagnostics : nil)
     } catch {
       return ControlResponse(
         ok: false, exitCode: 2, message: error.localizedDescription, status: state)

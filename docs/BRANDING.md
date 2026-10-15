@@ -1,9 +1,13 @@
-# DS4Mouse icon
+# DS4Mouse icons
 
-The original icon was generated with GPT image generation on October 15, 2026. The generated PNG is in `Resources/Branding/logo.png`; `Resources/AppIcon.icns` contains standard macOS icon sizes derived using sips and iconutil.
+Both current icons reuse one GPT-generated DualShock 4 controller-and-pointer mark. The rounded controller body, outward grips, rectangular touchpad, d-pad, four buttons, and symmetric analog sticks distinguish it from the earlier artwork.
 
-Generation mode: new image, transparent background.
+- `Resources/Branding/dualshock4-mark-cursor-inside-original.png`: current generated transparent original.
+- `Resources/Branding/dualshock4-mark.png`: trimmed and centered 1024 × 1024 master.
+- `Resources/MenuBarIcon.png`: 88 × 88 transparent export; displayed as a 22 × 22-point AppKit template inside a 26-point status item, with two points of side spacing.
+- `Resources/Branding/logo.png`: 1024 × 1024 app icon, using the exact same master mask tinted white over a blue rounded-square background.
+- `Resources/AppIcon.icns`: standard macOS icon representations of the app icon.
 
-Prompt:
+The menu bar template adapts to light and dark appearances. Neither version stretches the controller. The app composition is rendered with AppKit by `swift scripts/render-app-icon.swift`; its controller mask is shared rather than separately generated, so both controller shapes remain identical.
 
-> Create a polished original macOS application icon for DS4Mouse, a utility that turns a game controller touchpad into a computer mouse. A simplified game controller silhouette with an emphasized central touchpad and a mouse-arrow pointer integrated into it. Compact, readable at 32 pixels, cobalt blue and cool white on a deep navy rounded-square tile, generous safe margins, crisp geometry. No text, PlayStation symbols, Sony logos, tiny decorative details, or watermark. One square icon with transparent canvas outside the tile.
+Generation: GPT image generation, transparent-background edit, October 15, 2026. Prompt requested a compact black DualShock 4/PS4 silhouette with short rounded outward grips, broad rectangular touchpad, separate d-pad and four round buttons, symmetric low analog sticks, and a small mouse cursor entirely inset within the touchpad. The earlier arrow extending above the controller was removed. Square composition, transparent cutouts, bold geometry, no background, text, branding, shadows, or DualSense shell panels. Earlier generated assets remain as design history.

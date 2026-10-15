@@ -1,6 +1,6 @@
 # Releasing DS4Mouse
 
-Local builds use an ad hoc signature. This checks bundle integrity but does not establish a trusted publisher or constitute notarization.
+Local builds use an available Apple Development certificate to keep privacy permissions stable across updates. `DS4_LOCAL_SIGN_IDENTITY` selects an explicit identity; without a development identity the build falls back to ad hoc signing and warns that permissions may need renewal. Neither development signing nor ad hoc signing constitutes Developer ID distribution signing or notarization.
 
 The source uses MIT, the repository is `vivs999/DS4Mouse`, and the app identifier is `io.github.vivs999.DS4Mouse`. Review compatibility claims against [VERIFICATION.md](VERIFICATION.md). Follow [USER-TODO.md](../USER-TODO.md) for Apple account prerequisites.
 
