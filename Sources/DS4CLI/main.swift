@@ -3,7 +3,7 @@ import DS4Platform
 import Foundation
 
 let help = """
-  DS4Mouse — Bluetooth DualShock 4 touchpad mouse
+  DS4Mouse — USB / Bluetooth DualShock 4 touchpad mouse
 
     ds4mouse on | off | toggle | status | doctor
     ds4mouse mappings

@@ -26,9 +26,7 @@ import IOKit.hidsystem
   private var configError: String?
   private var wasReady = false
   private var running = false
-  private var offeredInputPermission = false
   private var requestedOutputPermission = false
-  private var inputPermissionAlert: NSAlert?
 
   public init() {
     do { configuration = try store.load() } catch {
@@ -180,6 +178,7 @@ import IOKit.hidsystem
     !state.permissionGranted || needsInputMonitoringPermission
   }
   public func openInputMonitoringSettings() {
+    guard needsInputMonitoringPermission else { return }
     _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
     if let url = URL(
       string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")
@@ -187,40 +186,9 @@ import IOKit.hidsystem
       NSWorkspace.shared.open(url)
     }
   }
-  private func offerInputMonitoring() {
-    guard !offeredInputPermission, needsInputMonitoringPermission else { return }
-    offeredInputPermission = true
-    let alert = NSAlert()
-    alert.messageText = "Allow controller input"
-    alert.informativeText =
-      "Enable DS4Mouse in Privacy & Security → Input Monitoring so it can read your controller. "
-      + "After changing permission, quit and reopen DS4Mouse."
-    alert.addButton(withTitle: "Open Input Monitoring")
-    alert.addButton(withTitle: "Not now")
-    inputPermissionAlert = alert
-    let permissionTimer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
-      Task { @MainActor in
-        guard let self, let current = self.inputPermissionAlert,
-          NSApp.modalWindow === current.window, !self.needsInputMonitoringPermission
-        else { return }
-        NSApp.stopModal(withCode: .abort)
-        current.window.orderOut(nil)
-      }
-    }
-    RunLoop.main.add(permissionTimer, forMode: .modalPanel)
-    defer {
-      permissionTimer.invalidate()
-      inputPermissionAlert = nil
-    }
-    NSApp.activate(ignoringOtherApps: true)
-    if alert.runModal() == .alertFirstButtonReturn { openInputMonitoringSettings() }
-  }
   public func perform(_ request: ControlRequest) {
     let response = handle(request)
     uiError = response.exitCode == 2 || response.exitCode == 3 ? response.message : nil
-    if response.ok, state.enabled, ["on", "toggle"].contains(request.command) {
-      offerInputMonitoring()
-    }
   }
   public func handle(_ request: ControlRequest) -> ControlResponse {
     guard running else {

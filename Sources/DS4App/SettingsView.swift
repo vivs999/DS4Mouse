@@ -29,7 +29,8 @@ struct SettingsView: View {
         Form {
           Section("Connection") {
             if service.state.devices.isEmpty {
-              Text("Connect your DualShock 4 in macOS Bluetooth settings.")
+              Text(
+                "Connect your DualShock 4 with a USB data cable or pair it in Bluetooth settings.")
             } else {
               Picker(
                 "Controller",

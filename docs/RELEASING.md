@@ -23,7 +23,7 @@ export DS4_NOTARY_PROFILE='your-notary-profile'
 
 The release script checks the source, signs the CLI and app with Hardened Runtime and timestamps, notarizes and staples the app, then packages, signs, notarizes, and staples the DMG. It requires accepted notarization results and validates the tickets. It does not publish to GitHub. Apple notarization checks software signatures and security; it is not functional certification or App Store review.
 
-Before publishing, verify the downloaded artifact on another Mac, including launch, permissions, Bluetooth connection, taps, scrolling, dragging, disable during drag, and reconnect. Review [VERIFICATION.md](VERIFICATION.md) before making compatibility claims. Publish only the intended DMG and checksum, without notarization logs or credentials.
+Before publishing, verify the downloaded artifact on another Mac, including launch, permissions, USB and Bluetooth connections, taps, scrolling, dragging, disable during drag, and reconnect. Review [VERIFICATION.md](VERIFICATION.md) before making compatibility claims. Publish only the intended DMG and checksum, without notarization logs or credentials.
 
 Local source builds select an available Apple Development certificate to preserve privacy identity across updates. `DS4_LOCAL_SIGN_IDENTITY` overrides it; `-` requests ad hoc signing. Apple Development signing is not Developer ID distribution signing. Replacing an ad hoc build can require granting mouse-control permission again.
 

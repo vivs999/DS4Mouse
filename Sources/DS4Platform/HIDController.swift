@@ -11,11 +11,13 @@ import IOKit.hid
   public init() {}
 
   public func start() {
-    let matches: [[String: Any]] = [0x05C4, 0x09CC].map {
-      [
-        kIOHIDVendorIDKey: 0x054C, kIOHIDProductIDKey: $0,
-        kIOHIDTransportKey: "Bluetooth", kIOHIDPrimaryUsagePageKey: 1, kIOHIDPrimaryUsageKey: 5,
-      ]
+    let matches: [[String: Any]] = ["Bluetooth", "USB"].flatMap { transport in
+      [0x05C4, 0x09CC].map { product in
+        [
+          kIOHIDVendorIDKey: 0x054C, kIOHIDProductIDKey: product,
+          kIOHIDTransportKey: transport, kIOHIDPrimaryUsagePageKey: 1, kIOHIDPrimaryUsageKey: 5,
+        ]
+      }
     }
     IOHIDManagerSetDeviceMatchingMultiple(manager, matches as CFArray)
     let context = Unmanaged.passUnretained(self).toOpaque()
@@ -61,7 +63,9 @@ import IOKit.hid
     guard sessions[id] == nil else { return }
     let name =
       IOHIDDeviceGetProperty(device, kIOHIDProductKey as CFString) as? String ?? "DualShock 4"
-    let session = HIDSession(device: device, id: id, name: name, owner: self)
+    let transport = IOHIDDeviceGetProperty(device, kIOHIDTransportKey as CFString) as? String
+    let displayName = transport.map { "\(name) (\($0))" } ?? name
+    let session = HIDSession(device: device, id: id, name: displayName, owner: self)
     sessions[id] = session
     session.open()
     publishDevices()

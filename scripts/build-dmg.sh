@@ -44,7 +44,8 @@ DS4Mouse
 
 1. Quit any existing DS4Mouse copy. Drag DS4Mouse.app into Applications.
    Keep only one installed copy to avoid confusion about permissions.
-2. Pair your DualShock 4 over Bluetooth (hold SHARE + PS until flashing).
+2. Connect your DualShock 4 with a USB data cable, or pair over Bluetooth
+   (hold SHARE + PS until flashing). Charge-only USB cables do not work.
 3. Open DS4Mouse and choose Settings from its controller menu bar icon.
 4. Grant mouse control using the General permission button, then enable it.
    macOS 27 calls this Device Control and Data Access; earlier versions call
@@ -56,7 +57,7 @@ The CLI is bundled at:
 Help, source, compatibility, and issue reports:
 https://github.com/vivs999/DS4Mouse
 
-Tested with a Bluetooth DualShock 4 revision 2 on Apple silicon macOS 27.
+See the verification record for tested USB/Bluetooth controllers and Macs.
 Other hardware and macOS versions require testing. Mouse control starts
 turned off on every launch. This app does not install a kernel extension.
 TEXT

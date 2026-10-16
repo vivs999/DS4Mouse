@@ -4,7 +4,7 @@
 
 <h1 align="center">DS4Mouse</h1>
 <p align="center"><strong>Your PS4 controller already has a trackpad. Put it to work.</strong></p>
-<p align="center">A native Mac menu bar app that turns a Bluetooth DualShock 4 touchpad into a mouse.</p>
+<p align="center">A native Mac menu bar app that turns a USB or Bluetooth DualShock 4 touchpad into a mouse.</p>
 <p align="center">
   <a href="https://github.com/vivs999/DS4Mouse/actions/workflows/ci.yml"><img src="https://github.com/vivs999/DS4Mouse/actions/workflows/ci.yml/badge.svg" alt="macOS build and tests"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
@@ -16,7 +16,7 @@ Move the pointer, tap to click, scroll with two fingers, and hold the touchpad b
 
 **Free and open source.** No account, subscription, analytics, or runtime downloads. DS4Mouse runs locally and has no third-party runtime dependencies.
 
-> **Development preview:** [Download the Apple silicon DMG](https://github.com/vivs999/DS4Mouse/releases/tag/v0.2.0-preview.1). It is ad hoc signed and **not notarized**; macOS may block it. See the installation notes below before downloading. Source builds are also available.
+> **Development preview:** [Download the Apple silicon DMG](https://github.com/vivs999/DS4Mouse/releases/tag/v0.2.1-preview.1). It is ad hoc signed and **not notarized**; macOS may block it. See the installation notes below before downloading. Source builds are also available.
 
 ## What it does
 
@@ -52,7 +52,7 @@ Add `~/.local/bin` to your PATH to use `ds4mouse` directly.
 
 ### Build from source
 
-You need a DualShock 4, Bluetooth, and an Apple Swift 6 toolchain with the macOS SDK. Install Xcode or Apple's Command Line Tools before building.
+You need a DualShock 4, a USB data cable or Bluetooth, and an Apple Swift 6 toolchain with the macOS SDK. Install Xcode or Apple's Command Line Tools before building.
 
 ```sh
 git clone https://github.com/vivs999/DS4Mouse.git
@@ -65,12 +65,12 @@ The installer places the app in `~/Applications/DS4Mouse.app`, creates `~/.local
 
 ### Pair and enable
 
-1. **Pair your controller.** Hold **SHARE + PS** until the light bar flashes, then connect it in macOS Bluetooth settings.
+1. **Connect your controller.** Plug it in with a USB data cable (a charge-only cable will not work), or hold **SHARE + PS** until the light bar flashes and pair it in macOS Bluetooth settings. USB needs no Bluetooth pairing. If multiple connections appear, choose the USB entry in the Controller picker.
 2. **Open DS4Mouse Settings** from its controller icon in the menu bar.
 3. **Allow mouse control** with the button in General. On macOS 27, the permission is named **Device Control and Data Access**; earlier macOS versions call it **Accessibility**. Authorize the installed copy of DS4Mouse.
 4. **Enable mouse control.** Mouse control starts disabled each time the app launches. If macOS needs a restart after a permission change, quit and reopen DS4Mouse, then enable it again.
 
-If macOS blocks controller input, General also offers an **Input Monitoring** shortcut. Permission prompts and settings shortcuts disappear once their requirements are satisfied; working controller input is recognized even when a separate Input Monitoring grant is unnecessary.
+If macOS blocks controller input, General also offers an **Input Monitoring** shortcut. Input Monitoring opens only when you click its settings button; enabling mouse control does not show an automatic input-permission dialog. Resolved settings shortcuts disappear. Working controller input is recognized even when a separate Input Monitoring grant is unnecessary.
 
 To try the build before installing:
 
@@ -156,7 +156,8 @@ Settings live at `~/Library/Application Support/DS4Mouse/config.json`. Export re
 | DualShock 4 revision 1 | Device matching implemented; hardware testing needed |
 | macOS 13+ | Build deployment target; earlier macOS versions have not been validated |
 | Intel Macs | Not yet tested |
-| USB connection, DualSense, other controllers | Outside the current supported scope |
+| DualShock 4 revision 2 over USB | Hardware-tested: movement, tapping, and dragging; no repeated Input Monitoring popup |
+| DualSense, other controllers | Outside the current supported scope |
 
 See the [verification record](docs/VERIFICATION.md) for the exact test environment and remaining checks, including reconnecting during a drag, sleep/wake, and multiple monitors. A passing build does not establish compatibility with every Mac or controller.
 
@@ -168,7 +169,7 @@ See the [verification record](docs/VERIFICATION.md) for the exact test environme
 
 **Permission disappears after a local update?** Ad hoc signatures identify a particular build. Local builds use an available Apple Development certificate to keep identity stable across updates. Choose a specific identity with `DS4_LOCAL_SIGN_IDENTITY`, or use `-` to force ad hoc signing. Without a development certificate, the build falls back to ad hoc signing and warns that permission may need renewal. Development signing does not make a build notarized.
 
-**No controller reports?** Confirm the controller is connected over Bluetooth and check Input Monitoring if input is blocked. Close conflicting remappers. For a controller-only diagnostic that does not move the pointer:
+**No controller reports?** Confirm the controller is paired over Bluetooth or plugged in with a USB data cable, and check Input Monitoring if input is blocked. For USB, try a different cable or port if no controller appears. Close conflicting remappers. For a controller-only diagnostic that does not move the pointer:
 
 ```sh
 swift run DS4Probe 10
@@ -182,12 +183,12 @@ Fully quit the old app before replacing an installation. Use **Disable** or **Qu
 ./scripts/check.sh           # Strict formatting, tests, app build, and bundle checks
 ```
 
-The suite currently has **29 tests** covering report validation, gestures, acceleration, configuration, and local IPC. Hardware checks are recorded separately.
+The suite currently has **33 tests** covering report validation, gestures, acceleration, configuration, and local IPC. Hardware checks are recorded separately.
 
 | Module | Responsibility |
 | --- | --- |
 | `DS4Core` | Report parsing, gestures, mappings, acceleration, and command protocol |
-| `DS4Platform` | Bluetooth HID input, mouse events, persistence, and local IPC |
+| `DS4Platform` | USB/Bluetooth HID input, mouse events, persistence, and local IPC |
 | `DS4App` | Menu bar and settings interface |
 | `DS4CLI` | Command-line control |
 
