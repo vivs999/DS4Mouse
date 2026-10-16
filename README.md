@@ -16,7 +16,7 @@ Move the pointer, tap to click, scroll with two fingers, and hold the touchpad b
 
 **Free and open source.** No account, subscription, analytics, or runtime downloads. DS4Mouse runs locally and has no third-party runtime dependencies.
 
-> **Current distribution: source preview.** Build instructions are below. A Developer ID-signed, notarized download is not available yet; [release requirements](USER-TODO.md) are tracked openly.
+> **Development preview:** [Download the Apple silicon DMG](https://github.com/vivs999/DS4Mouse/releases/tag/v0.2.0-preview.1). It is ad hoc signed and **not notarized**; macOS may block it. See the installation notes below before downloading. Source builds are also available.
 
 ## What it does
 
@@ -29,6 +29,29 @@ Move the pointer, tap to click, scroll with two fingers, and hold the touchpad b
 
 ## Get started
 
+### Download the app
+
+Download the DMG from [Releases](https://github.com/vivs999/DS4Mouse/releases), open it, and drag DS4Mouse into Applications. Quit any existing copy first and keep only one installed copy so permissions apply to the app you use. The preview download is for **Apple silicon**.
+
+This preview is ad hoc signed, without Developer ID signing or Apple notarization. If macOS blocks launch, review the message in **System Settings → Privacy & Security** and use **Open Anyway** only if you trust this project. Some systems or managed Macs may refuse this preview; building from source is the alternative. Do not disable Gatekeeper globally. Downloaded installation on a separate Mac has not yet been validated.
+
+The CLI is inside the app. For an installation in `/Applications`, run:
+
+```sh
+/Applications/DS4Mouse.app/Contents/MacOS/ds4mouse help
+```
+
+Optionally create a user-local shortcut, provided that path is unused:
+
+```sh
+mkdir -p ~/.local/bin
+ln -s /Applications/DS4Mouse.app/Contents/MacOS/ds4mouse ~/.local/bin/ds4mouse
+```
+
+Add `~/.local/bin` to your PATH to use `ds4mouse` directly.
+
+### Build from source
+
 You need a DualShock 4, Bluetooth, and an Apple Swift 6 toolchain with the macOS SDK. Install Xcode or Apple's Command Line Tools before building.
 
 ```sh
@@ -39,6 +62,8 @@ cd DS4Mouse
 ```
 
 The installer places the app in `~/Applications/DS4Mouse.app`, creates `~/.local/bin/ds4mouse`, and opens the app. It refuses to overwrite an existing installation or CLI entry. Add `~/.local/bin` to your PATH if you want to use the short CLI command.
+
+### Pair and enable
 
 1. **Pair your controller.** Hold **SHARE + PS** until the light bar flashes, then connect it in macOS Bluetooth settings.
 2. **Open DS4Mouse Settings** from its controller icon in the menu bar.
@@ -139,7 +164,7 @@ See the [verification record](docs/VERIFICATION.md) for the exact test environme
 
 **Connected, but the pointer does not move?** Run `ds4mouse doctor --json`. Check `enabled`, `permissionGranted`, `ready`, and `validReports`. Its diagnostics identify the exact running app path and separate mouse-event permission from controller-input access.
 
-**Permission is switched on, but the app still reports it missing?** Confirm that the permission belongs to the installed app. Remove a stale DS4Mouse entry, add `~/Applications/DS4Mouse.app`, enable it, then quit and reopen the app. The permission's name on macOS 27 is **Device Control and Data Access**.
+**Permission is switched on, but the app still reports it missing?** Confirm that the permission belongs to the installed app. Remove a stale DS4Mouse entry, add your installed copy (`/Applications/DS4Mouse.app` for DMG installs or `~/Applications/DS4Mouse.app` for source installs), enable it, then quit and reopen the app. The permission's name on macOS 27 is **Device Control and Data Access**.
 
 **Permission disappears after a local update?** Ad hoc signatures identify a particular build. Local builds use an available Apple Development certificate to keep identity stable across updates. Choose a specific identity with `DS4_LOCAL_SIGN_IDENTITY`, or use `-` to force ad hoc signing. Without a development certificate, the build falls back to ad hoc signing and warns that permission may need renewal. Development signing does not make a build notarized.
 
@@ -172,7 +197,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance, [protocol prov
 
 DS4Mouse reads supported controller reports and generates mouse events locally. It does not record keyboard input, contact servers, or collect analytics. The control socket is restricted to the current user.
 
-To uninstall, quit the app and remove `~/Applications/DS4Mouse.app` and the `~/.local/bin/ds4mouse` symlink. Remove `~/Library/Application Support/DS4Mouse` only if you also want to delete saved settings and backups. You can remove DS4Mouse's permission entries from macOS privacy settings afterward.
+To uninstall, quit the app and remove its installed copy (`/Applications/DS4Mouse.app` or `~/Applications/DS4Mouse.app`) and any `~/.local/bin/ds4mouse` symlink you created. Remove `~/Library/Application Support/DS4Mouse` only if you also want to delete saved settings and backups. You can remove DS4Mouse's permission entries from macOS privacy settings afterward.
 
 ## License
 

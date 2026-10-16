@@ -1,17 +1,30 @@
 # Releasing DS4Mouse
 
-Local builds use an available Apple Development certificate to keep privacy permissions stable across updates. `DS4_LOCAL_SIGN_IDENTITY` selects an explicit identity; without a development identity the build falls back to ad hoc signing and warns that permissions may need renewal. Neither development signing nor ad hoc signing constitutes Developer ID distribution signing or notarization.
+## Development preview DMG
 
-The source uses MIT, the repository is `vivs999/DS4Mouse`, and the app identifier is `io.github.vivs999.DS4Mouse`. Review compatibility claims against [VERIFICATION.md](VERIFICATION.md). Follow [USER-TODO.md](../USER-TODO.md) for Apple account prerequisites.
-
-Use a Developer ID Application certificate with its private key in Keychain. Configure a named `notarytool` Keychain profile using Apple's supported authentication workflow. Keep credentials outside the project. Set `DS4_SIGN_IDENTITY` to the identity name and `DS4_NOTARY_PROFILE` to the profile name, then run:
+The preview is for testers. It is ad hoc signed, without Developer ID distribution signing or Apple notarization. Gatekeeper may block it. Never label it notarized or broadly compatible.
 
 ```sh
+DS4_LOCAL_SIGN_IDENTITY=- ./scripts/check.sh
+./scripts/build-dmg.sh --development
+```
+
+The DMG contains DS4Mouse.app, an Applications shortcut, a short installation guide, and the MIT license. The CLI is inside the app bundle. Outputs and SHA-256 checksums are written to `dist/`; they are not source-controlled. The architecture label is derived from the built executable.
+
+## Developer ID distribution
+
+A paid Apple Developer Program membership, a Developer ID Application certificate and private key in Keychain, and a named `notarytool` Keychain profile are required. These prerequisites are not configured for the preview. Keep all credentials outside the repository.
+
+```sh
+export DS4_SIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)'
+export DS4_NOTARY_PROFILE='your-notary-profile'
 ./scripts/release.sh
 ```
 
-The script runs local checks, signs the bundled CLI and app with Hardened Runtime and timestamps, submits a ZIP to Apple's notary service, requires acceptance, staples the ticket, validates Gatekeeper assessment, and creates a ZIP plus SHA-256 checksum. Running this script sends the build to Apple for notarization; it does not publish to GitHub.
+The release script checks the source, signs the CLI and app with Hardened Runtime and timestamps, notarizes and staples the app, then packages, signs, notarizes, and staples the DMG. It requires accepted notarization results and validates the tickets. It does not publish to GitHub. Apple notarization checks software signatures and security; it is not functional certification or App Store review.
 
-Verify the resulting downloaded artifact on a separate user account or Mac, including initial launch, Accessibility permissions, Bluetooth connection, both tap gestures, scrolling, dragging, disable during drag, and reconnect. Check both controller revisions before claiming both are hardware-tested. Test each macOS version listed as supported.
+Before publishing, verify the downloaded artifact on another Mac, including launch, permissions, Bluetooth connection, taps, scrolling, dragging, disable during drag, and reconnect. Review [VERIFICATION.md](VERIFICATION.md) before making compatibility claims. Publish only the intended DMG and checksum, without notarization logs or credentials.
 
-Only publish after the user's explicit request. A public source repository does not require an Apple certificate. The signed app release process does. Apple notarization is an automated security/signature check, not a functional certification or App Store review. [Apple distribution documentation](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
+Local source builds select an available Apple Development certificate to preserve privacy identity across updates. `DS4_LOCAL_SIGN_IDENTITY` overrides it; `-` requests ad hoc signing. Apple Development signing is not Developer ID distribution signing. Replacing an ad hoc build can require granting mouse-control permission again.
+
+[Apple notarization documentation](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)

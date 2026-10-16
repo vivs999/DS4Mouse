@@ -18,6 +18,20 @@ notary_status="$(plutil -extract status raw -o - dist/notarization.json)"
 xcrun stapler staple "$bundle"
 xcrun stapler validate "$bundle"
 spctl --assess --type execute --verbose=2 "$bundle"
-ditto -c -k --keepParent "$bundle" dist/DS4Mouse-macos-arm64.zip
-shasum -a 256 dist/DS4Mouse-macos-arm64.zip > dist/DS4Mouse-macos-arm64.zip.sha256
-printf 'Signed package prepared locally. Nothing was uploaded to GitHub.\n'
+./scripts/build-dmg.sh --release
+version="$(plutil -extract CFBundleShortVersionString raw -o - "$bundle/Contents/Info.plist")"
+# Packaging derives the architecture from the executable, as does this lookup.
+architecture="$(lipo -archs "$bundle/Contents/MacOS/DS4MouseApp")"
+case "$architecture" in 'x86_64 arm64'|'arm64 x86_64') architecture="universal" ;; esac
+dmg="dist/DS4Mouse-${version}-macos-${architecture}.dmg"
+codesign --force --timestamp --sign "$DS4_SIGN_IDENTITY" "$dmg"
+xcrun notarytool submit "$dmg" --keychain-profile "$DS4_NOTARY_PROFILE" --wait --output-format json > dist/dmg-notarization.json
+[[ "$(plutil -extract status raw -o - dist/dmg-notarization.json)" == "Accepted" ]] || {
+  printf 'DMG notarization was not accepted. Inspect dist/dmg-notarization.json.\n' >&2
+  exit 1
+}
+xcrun stapler staple "$dmg"
+xcrun stapler validate "$dmg"
+hdiutil verify "$dmg"
+(cd dist && shasum -a 256 "$(basename "$dmg")" > "$(basename "$dmg").sha256")
+printf 'Signed packages prepared locally. Nothing was uploaded to GitHub.\n'

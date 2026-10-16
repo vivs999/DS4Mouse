@@ -16,4 +16,6 @@ jobs:
           xcodebuild -version
           swift --version
       - name: Format, test, and build local app
-        run: ./scripts/check.sh
+        run: DS4_LOCAL_SIGN_IDENTITY=- ./scripts/check.sh
+      - name: Package development DMG
+        run: ./scripts/build-dmg.sh --development

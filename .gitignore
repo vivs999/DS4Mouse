@@ -7,3 +7,9 @@ dist/
 *.mobileprovision
 *.provisionprofile
 .env
+.env.*
+*.pem
+*.key
+*.cer
+*.log
+work/
